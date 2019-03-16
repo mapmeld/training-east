@@ -7,6 +7,7 @@ from PIL import Image
 
 scans = ['Or 8349_0020', 'Delhi Arabic 1901_0155', 'Add MS 7474_0043']
 ns = '{http://schema.primaresearch.org/PAGE/gts/pagecontent/2018-07-15}'
+# some ns have 2017-07-15
 
 for scan in scans:
     im = Image.open(scan + '.tif')
@@ -41,7 +42,7 @@ for scan in scans:
                     ymin = min(ymin, int(y))
                     ymax = max(ymax, int(y))
             if (xmax > 0 and xmin != xmax and ymin != ymax):
-                rectangles.append([str(xmin), str(ymin), str(xmax), str(ymax)])
+                rectangles.append([str(xmin - blockx0), str(ymin - blocky0), str(xmax - blockx0), str(ymax - blocky0)])
         if (len(rectangles) > 0):
             # useful image
             print('block' + str(block))
@@ -50,11 +51,15 @@ for scan in scans:
             cropped.save(cropname + '.png', 'PNG')
 
             sample = open(cropname + '.txt', 'w')
+            index = 0
             for rectangle in rectangles:
                 # use ### for non Latin text?
+                index = index + 1
                 sample.write(','.join([
                     rectangle[0], rectangle[1],
                     rectangle[2], rectangle[1],
                     rectangle[2], rectangle[3],
                     rectangle[0], rectangle[3]
-                ]) + ",###\n")
+                ]) + ",###")
+                if index != len(rectangles):
+                    sample.write('\n')
